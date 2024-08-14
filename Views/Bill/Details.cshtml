@@ -1,0 +1,81 @@
+﻿@model E_Bill.Models.Bill
+
+@{
+    ViewBag.Title = "Bill Details";
+    Layout = "_HomeLayout";
+}
+
+<h2 class="mb-4">Bill Details</h2>
+
+<div class="mb-4">
+    <h4>Bill</h4>
+    <hr />
+    <dl class="row mb-4">
+        <dt class="col-sm-2">
+            Customer Name
+        </dt>
+        <dd class="col-sm-10">
+            @Model.CustomerName
+        </dd>
+        <dt class="col-sm-2">
+            Address
+        </dt>
+        <dd class="col-sm-10">
+            @Model.CustomerAddress
+        </dd>
+        <dt class="col-sm-2">
+            Phone
+        </dt>
+        <dd class="col-sm-10">
+            @Model.CustomerPhone
+        </dd>
+        <dt class="col-sm-2">
+            Amount
+        </dt>
+        <dd class="col-sm-10">
+            @Model.Amount.ToString("C")
+        </dd>
+    </dl>
+</div>
+
+<!-- Table to Display Bill Items -->
+<h3 class="mb-3">Items</h3>
+@if (Model.Items != null && Model.Items.Any())
+{
+    <table class="table table-striped mb-4">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Items)
+            {
+                <tr>
+                    <td>@item.ProductName</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Quantity</td>
+                    <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Total Amount -->
+    <div class="mb-4" style="font-size: 1.5em; font-weight: bold;">
+        Total Amount: @Model.Items.Sum(i => i.Price * i.Quantity).ToString("C")
+    </div>
+}
+else
+{
+    <p class="mb-4">No items in this bill.</p>
+}
+
+
+<div class="d-flex justify-content-center mt-4">
+    <a asp-action="ViewBills" class="btn btn-secondary">Back to List</a>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">Home</a>
+</div>

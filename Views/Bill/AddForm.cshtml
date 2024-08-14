@@ -1,0 +1,147 @@
+﻿@model E_Bill.Models.Bill
+
+@{
+    ViewBag.Title = "Add New Bill";
+    Layout = "_HomeLayout";
+}
+
+<h2 class="mb-4">Add New Bill</h2>
+
+<form asp-action="AddBillDb" asp-controller="Bill" method="post" class="form-horizontal">
+    <!-- Customer Name -->
+    <div class="form-group mb-3">
+        <label asp-for="CustomerName" class="control-label">Customer Name</label>
+        <input asp-for="CustomerName" class="form-control" />
+        <span asp-validation-for="CustomerName" class="text-danger"></span>
+    </div>
+
+    <!-- Address -->
+    <div class="form-group mb-3">
+        <label asp-for="CustomerAddress" class="control-label">Address</label>
+        <input asp-for="CustomerAddress" class="form-control" />
+        <span asp-validation-for="CustomerAddress" class="text-danger"></span>
+    </div>
+
+    <!-- Phone -->
+    <div class="form-group mb-3">
+        <label asp-for="CustomerPhone" class="control-label">Phone</label>
+        <input asp-for="CustomerPhone" class="form-control" type="tel" />
+        <span asp-validation-for="CustomerPhone" class="text-danger"></span>
+    </div>
+
+    <!-- Button to Reveal Item Input Section -->
+    <div class="form-group mb-4">
+        <button type="button" class="btn btn-primary" id="revealItemInput">Add Item</button>
+    </div>
+
+    <!-- Hidden Item Input Section -->
+    <div id="itemInputSection" class="form-group mb-4" style="display:none;">
+        <div class="row mb-2">
+            <div class="col-md-4">
+                <input type="text" id="productName" class="form-control" placeholder="Product Name" />
+            </div>
+            <div class="col-md-4">
+                <input type="number" id="price" class="form-control" placeholder="Price" step="0.01" />
+            </div>
+            <div class="col-md-4">
+                <input type="number" id="quantity" class="form-control" placeholder="Quantity" />
+            </div>
+        </div>
+        <button type="button" class="btn btn-success" id="saveItem">Save</button>
+    </div>
+
+    <!-- Hidden Input to Store Serialized Items -->
+    <input type="hidden" name="SerializedItems" id="SerializedItems" />
+
+    <!-- Table to Display Added Items -->
+    <h3 class="mt-4 mb-3">Items</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="itemsTableBody">
+            <!-- Items will be added here dynamically using JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- Save Button -->
+    <div class="form-group mt-4">
+        <button type="submit" class="btn btn-success">Submit</button>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        let items = [];
+
+        // Reveal Item Input Section
+        document.getElementById('revealItemInput').addEventListener('click', function () {
+            document.getElementById('itemInputSection').style.display = 'block';
+            document.getElementById('revealItemInput').style.display = 'none';
+        });
+
+        // Save Item and Add to Table
+        document.getElementById('saveItem').addEventListener('click', function () {
+            var productName = document.getElementById('productName').value;
+            var price = document.getElementById('price').value;
+            var quantity = document.getElementById('quantity').value;
+
+            if (productName && price && quantity) {
+                var item = {
+                    ProductName: productName,
+                    Price: parseFloat(price),
+                    Quantity: parseInt(quantity)
+                };
+
+                items.push(item);
+
+                var tableBody = document.getElementById('itemsTableBody');
+                var newRow = tableBody.insertRow();
+
+                var cell1 = newRow.insertCell(0);
+                var cell2 = newRow.insertCell(1);
+                var cell3 = newRow.insertCell(2);
+                var cell4 = newRow.insertCell(3);
+
+                cell1.innerHTML = productName;
+                cell2.innerHTML = price;
+                cell3.innerHTML = quantity;
+                cell4.innerHTML = '<button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">Remove</button>';
+
+                // Clear input fields and hide item input section
+                document.getElementById('productName').value = '';
+                document.getElementById('price').value = '';
+                document.getElementById('quantity').value = '';
+
+                document.getElementById('itemInputSection').style.display = 'none';
+                document.getElementById('revealItemInput').style.display = 'block';
+
+                // Serialize items array and assign to hidden input
+                document.getElementById('SerializedItems').value = JSON.stringify(items);
+            } else {
+                alert("Please fill out all fields.");
+            }
+        });
+
+        function removeItem(button) {
+            // Remove item from the items array
+            var row = button.parentNode.parentNode;
+            var index = row.rowIndex - 1;
+            items.splice(index, 1);
+            row.remove();
+
+            // Update serialized items value
+            document.getElementById('SerializedItems').value = JSON.stringify(items);
+        }
+    </script>
+}
